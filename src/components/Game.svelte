@@ -67,8 +67,10 @@
     <div class="now-row">
       <div class="now-info">
         <div class="batter-label">NOW BATTING</div>
-        <div class="batter-num">№ {batter.number ?? '?'}</div>
-        <div class="batter-name">{batter.name}</div>
+        <div class="batter-headline">
+          <span class="batter-name">{batter.name}</span>
+          <span class="batter-num">№ {batter.number ?? '?'}</span>
+        </div>
         <div class="batter-meta">
           {#if batter.walkup}
             ♪ {batter.walkup.title}{#if batter.walkup.placeholder} <span class="warn-chip">song pending</span>{/if}
