@@ -5,3 +5,4 @@ dev-dist/
 old/
 songs/
 src/lib/manifest.json
+.playwright-mcp/
