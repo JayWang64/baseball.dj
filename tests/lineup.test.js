@@ -96,10 +96,14 @@ describe('lineup store', () => {
     expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
   })
 
-  it('addAll appends only players not already in the order', () => {
-    lineup.toggle('Max')
-    lineup.addAll(['Ajith', 'Max', 'Theo'])
-    expect(get(lineup).order).toEqual(['Max', 'Ajith', 'Theo'])
+  it('seeds the full roster as present on first load, but saved state wins later', () => {
+    const fresh = createLineup(storage)
+    fresh.init('mdba/new-team', ['Ajith', 'Blake', 'Hugo'])
+    expect(get(fresh).order).toEqual(['Ajith', 'Blake', 'Hugo'])
+    fresh.toggle('Blake') // mark absent
+    const reloaded = createLineup(storage)
+    reloaded.init('mdba/new-team', ['Ajith', 'Blake', 'Hugo'])
+    expect(get(reloaded).order).toEqual(['Ajith', 'Hugo'])
   })
 
   it('persists the locked flag', () => {

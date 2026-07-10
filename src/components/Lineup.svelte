@@ -10,7 +10,7 @@
       .map((name) => team.players.find((p) => p.name === name))
       .filter(Boolean)
   )
-  const bench = $derived(
+  const absent = $derived(
     team.players
       .filter((p) => !$lineup.order.includes(p.name))
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -37,6 +37,11 @@
 <h1 class="screen-title">TODAY'S LINEUP</h1>
 
 {#if $lineup.locked}
+  <div class="lock-bar">
+    <button class="btn" onclick={() => lineup.setLocked(false)}>✎ EDIT LINEUP</button>
+    <button class="btn danger" onclick={() => lineup.resetGame()}>RESET TO TOP OF ORDER</button>
+  </div>
+
   <div class="panel">
     <div class="panel-title">BATTING ORDER · LOCKED</div>
     {#if !inOrder.length}
@@ -55,19 +60,27 @@
       </div>
     {/each}
   </div>
-
-  <div class="lock-bar">
-    <button class="btn" onclick={() => lineup.setLocked(false)}>✎ EDIT LINEUP</button>
-    <button class="btn danger" onclick={() => lineup.resetGame()}>RESET TO TOP OF ORDER</button>
-  </div>
 {:else}
+  <div class="lock-bar">
+    <button class="btn amber" disabled={!inOrder.length} onclick={() => lineup.setLocked(true)}>
+      🔒 LOCK LINEUP
+    </button>
+  </div>
+
   <div class="panel">
-    <div class="panel-title">BATTING TODAY · DRAG ≡ TO REORDER</div>
+    <div class="panel-title">BATTING ORDER · DRAG ≡ TO REORDER · UNCHECK IF ABSENT</div>
     {#if !inOrder.length}
-      <div class="toast-warn">tap players below to add them</div>
+      <div class="toast-warn">everyone is marked absent — check kids back in below</div>
     {/if}
     {#each inOrder as p, i (p.name)}
       <div class="lineup-row in" class:dragging={dragging === p.name} data-player={p.name}>
+        <input
+          type="checkbox"
+          class="attend"
+          checked
+          onchange={() => lineup.toggle(p.name)}
+          title="Attending — uncheck if absent"
+        />
         <span
           class="drag-handle"
           onpointerdown={(e) => dragStart(e, p.name)}
@@ -83,36 +96,25 @@
           {#if p.walkup}<small>{p.walkup.title}</small>{/if}
         </span>
         {#if p.number != null}<span class="lineup-num">#{p.number}</span>{/if}
-        <button class="btn remove-btn" onclick={() => lineup.toggle(p.name)} title="Move to bench">✕</button>
       </div>
     {/each}
   </div>
 
-  {#if bench.length}
+  {#if absent.length}
     <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">ON THE BENCH · TAP TO ADD</div>
-        <button class="btn add-all-btn" onclick={() => lineup.addAll(bench.map((p) => p.name))}>
-          + ADD ALL
-        </button>
-      </div>
-      {#each bench as p (p.name)}
-        <button class="lineup-row bench-row" onclick={() => lineup.toggle(p.name)}>
-          <span class="lineup-order">+</span>
-          <span class="lineup-name">
-            {p.name}
-            {#if !p.walkup}<span class="warn-chip">no song</span>{/if}
-            {#if p.walkup}<small>{p.walkup.title}</small>{/if}
-          </span>
+      <div class="panel-title">ABSENT TODAY · CHECK TO PUT BACK IN</div>
+      {#each absent as p (p.name)}
+        <div class="lineup-row absent-row">
+          <input
+            type="checkbox"
+            class="attend"
+            onchange={() => lineup.toggle(p.name)}
+            title="Absent — check to add back to the order"
+          />
+          <span class="lineup-name">{p.name}</span>
           {#if p.number != null}<span class="lineup-num">#{p.number}</span>{/if}
-        </button>
+        </div>
       {/each}
     </div>
   {/if}
-
-  <div class="lock-bar">
-    <button class="btn amber" disabled={!inOrder.length} onclick={() => lineup.setLocked(true)}>
-      🔒 LOCK LINEUP
-    </button>
-  </div>
 {/if}
