@@ -250,15 +250,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ============================ game screen ============================ */
 .now-panel {
-  display: flex; align-items: center; gap: 14px;
-  padding: 18px 16px;
+  padding: 18px 16px 14px;
   border-width: 2px;
   background:
     radial-gradient(120% 130% at 50% -20%, rgba(255,182,39,.14), transparent 60%),
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.2));
 }
 .now-panel.playing { border-color: var(--amber); box-shadow: 0 0 30px var(--amber-glow); }
+.now-row { display: flex; align-items: center; gap: 14px; }
 .now-info { flex: 1; min-width: 0; text-align: left; }
+.now-info .ondeck { text-align: left; margin-top: 6px; }
 .batter-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--chalk-faint); }
 .batter-name {
   font-family: var(--display); font-size: clamp(28px, 8vw, 44px);
@@ -270,7 +271,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .batter-meta .warn-chip { vertical-align: 1px; }
 
-.transport { flex: none; display: flex; align-items: center; gap: 10px; }
+.transport {
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  margin: 14px 0;
+}
 .t-btn {
   width: 68px; height: 68px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -288,10 +292,35 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .t-stop { color: var(--red); border-color: rgba(229,83,60,.5); background: var(--red-soft); }
 .t-btn:disabled { opacity: .35; pointer-events: none; }
 
-.batter-nav { display: flex; gap: 8px; margin-top: 10px; }
+.batter-nav { display: flex; gap: 8px; margin-top: 12px; }
 .batter-nav .btn { flex: 1; padding: 12px; }
 .ondeck { text-align: center; margin-top: 10px; font-size: 13px; color: var(--chalk-dim); }
 .ondeck b { color: var(--chalk); }
+
+/* collapsible batting order */
+.order-panel { padding-top: 6px; padding-bottom: 8px; }
+.collapse-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 2px;
+}
+.collapse-head .panel-title { margin-bottom: 0; }
+.collapse-caret { color: var(--amber); font-size: 16px; }
+.jump-row {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 10px; text-align: left;
+  border: 1.5px solid transparent;
+}
+.jump-row.active {
+  border-color: var(--amber); background: rgba(255,182,39,.12);
+}
+.jump-row .lineup-order { width: 28px; height: 28px; font-size: 13px; }
+.jump-row.active .lineup-order { color: #1c1302; background: var(--amber); border-color: transparent; }
+.jump-row .lineup-name { font-size: 15px; }
+.at-bat {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  color: var(--amber); border: 1px solid var(--amber);
+  border-radius: 7px; padding: 2px 6px;
+}
 
 .cheer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .cheer-btn {
