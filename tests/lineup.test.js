@@ -96,6 +96,12 @@ describe('lineup store', () => {
     expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
   })
 
+  it('addAll appends only players not already in the order', () => {
+    lineup.toggle('Max')
+    lineup.addAll(['Ajith', 'Max', 'Theo'])
+    expect(get(lineup).order).toEqual(['Max', 'Ajith', 'Theo'])
+  })
+
   it('persists the locked flag', () => {
     lineup.toggle('Max')
     lineup.setLocked(true)

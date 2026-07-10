@@ -90,7 +90,12 @@
 
   {#if bench.length}
     <div class="panel">
-      <div class="panel-title">ON THE BENCH · TAP TO ADD</div>
+      <div class="panel-head">
+        <div class="panel-title">ON THE BENCH · TAP TO ADD</div>
+        <button class="btn add-all-btn" onclick={() => lineup.addAll(bench.map((p) => p.name))}>
+          + ADD ALL
+        </button>
+      </div>
       {#each bench as p (p.name)}
         <button class="lineup-row bench-row" onclick={() => lineup.toggle(p.name)}>
           <span class="lineup-order">+</span>
