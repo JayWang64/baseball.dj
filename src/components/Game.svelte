@@ -5,6 +5,7 @@
 
   let { team } = $props()
   const nowPlaying = engine.nowPlaying
+  const paused = engine.paused
 
   const present = $derived(
     $lineup.order.filter((n) => !$lineup.absent.includes(n))
@@ -17,13 +18,16 @@
   const batterUrls = $derived(
     batter ? [batter.intro, batter.walkup?.url].filter(Boolean) : []
   )
-  const batterPlaying = $derived(
-    !!$nowPlaying && batterUrls.length > 0 && $nowPlaying.urls[0] === batterUrls[0]
-  )
+  const playing = $derived(!!$nowPlaying)
 
-  function playBatter() {
-    if (!batterUrls.length) return
-    engine.playSequence(batterUrls, { onDone: () => lineup.advance() })
+  function onPlayPause() {
+    if (!playing) {
+      if (batterUrls.length) engine.playSequence(batterUrls, { onDone: () => lineup.advance() })
+    } else if ($paused) {
+      engine.resume()
+    } else {
+      engine.pause()
+    }
   }
 </script>
 
@@ -32,19 +36,42 @@
 {#if !batter}
   <div class="panel">No lineup yet — set today's batting order on the Lineup tab.</div>
 {:else}
-  <button class="batter-card" class:playing={batterPlaying} onclick={playBatter}>
-    <div class="batter-label">NOW BATTING</div>
-    {#if batter.number != null}<div class="batter-num">№ {batter.number}</div>{/if}
-    <div class="batter-name">{batter.name}</div>
-    {#if batter.walkup}
-      <div class="batter-song">
-        ♪ {batter.walkup.title}{#if batter.walkup.placeholder} · song pending{/if}
+  <div class="panel now-panel" class:playing={playing && !$paused}>
+    <div class="now-info">
+      <div class="batter-label">NOW BATTING</div>
+      <div class="batter-name">{batter.name}</div>
+      <div class="batter-meta">
+        № {batter.number ?? '?'}
+        {#if batter.walkup}
+          · ♪ {batter.walkup.title}{#if batter.walkup.placeholder} <span class="warn-chip">song pending</span>{/if}
+        {:else}
+          · <span class="warn-chip">no song</span>
+        {/if}
       </div>
-      <div class="batter-hint">{batterPlaying ? 'PLAYING…' : 'TAP TO PLAY WALK-UP'}</div>
-    {:else}
-      <div class="toast-warn">no walk-up clip for {batter.name} yet</div>
-    {/if}
-  </button>
+    </div>
+    <div class="transport">
+      <button
+        class="t-btn t-play"
+        disabled={!playing && !batterUrls.length}
+        onclick={onPlayPause}
+        aria-label={playing && !$paused ? 'Pause' : 'Play'}
+      >
+        {#if playing && !$paused}
+          <svg viewBox="0 0 24 24"><path d="M6 5h4.4v14H6zM13.6 5H18v14h-4.4z" fill="currentColor"/></svg>
+        {:else}
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l12-7z" fill="currentColor"/></svg>
+        {/if}
+      </button>
+      <button
+        class="t-btn t-stop"
+        disabled={!playing}
+        onclick={() => engine.stop()}
+        aria-label="Stop"
+      >
+        <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
 
   <div class="batter-nav">
     <button class="btn" onclick={() => lineup.back()}>‹ BACK</button>
@@ -57,8 +84,3 @@
 {/if}
 
 <CheerGrid cheers={team.cheers} />
-
-<div class="dock">
-  <button class="btn" disabled={!$nowPlaying} onclick={() => engine.fadeOut()}>FADE</button>
-  <button class="btn danger" disabled={!$nowPlaying} onclick={() => engine.stop()}>■ STOP</button>
-</div>

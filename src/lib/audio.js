@@ -14,6 +14,7 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
 
   const nowPlaying = writable(null)
   const armed = writable(false)
+  const paused = writable(false)
 
   async function arm() {
     if (!ctx) ctx = makeCtx()
@@ -46,6 +47,7 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
 
   async function playSequence(urls, { onDone } = {}) {
     await arm()
+    paused.set(false)
     const myGen = ++gen
     fadeCurrent(300)
 
@@ -82,15 +84,30 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
     }
     current = null
     nowPlaying.set(null)
+    if (ctx?.state === 'suspended') ctx.resume()
+    paused.set(false)
   }
 
   function fadeOut(ms = 1500) {
     gen++
     fadeCurrent(ms)
     nowPlaying.set(null)
+    paused.set(false)
   }
 
-  return { arm, playSequence, stop, fadeOut, nowPlaying, armed }
+  // suspending the context freezes the buffer mid-note — the only way to
+  // "pause" a Web Audio BufferSource
+  function pause() {
+    if (ctx?.state === 'running') ctx.suspend()
+    paused.set(true)
+  }
+
+  function resume() {
+    if (ctx?.state === 'suspended') ctx.resume()
+    paused.set(false)
+  }
+
+  return { arm, playSequence, stop, fadeOut, pause, resume, nowPlaying, armed, paused }
 }
 
 export const engine = createEngine()

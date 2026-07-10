@@ -42,7 +42,8 @@ class FakeCtx {
     this.sources = []
     this.gains = []
   }
-  resume() { return Promise.resolve() }
+  suspend() { this.state = 'suspended'; return Promise.resolve() }
+  resume() { this.state = 'running'; return Promise.resolve() }
   createGain() { const g = new FakeGain(); this.gains.push(g); return g }
   createBufferSource() { const s = new FakeSource(); this.sources.push(s); return s }
   decodeAudioData(ab) { return Promise.resolve({ duration: 1, bytes: ab }) }
@@ -110,6 +111,28 @@ describe('audio engine', () => {
     engine.stop()
     await engine.playSequence(['a.mp3'])
     expect(fetchCalls.filter((u) => u === 'a.mp3')).toHaveLength(1)
+  })
+
+  it('pause suspends the context and resume/new-play recovers it', async () => {
+    await engine.playSequence(['a.mp3'])
+    engine.pause()
+    expect(ctx.state).toBe('suspended')
+    expect(get(engine.paused)).toBe(true)
+    engine.resume()
+    expect(ctx.state).toBe('running')
+    expect(get(engine.paused)).toBe(false)
+    engine.pause()
+    await engine.playSequence(['b.mp3']) // starting fresh audio un-pauses
+    expect(ctx.state).toBe('running')
+    expect(get(engine.paused)).toBe(false)
+  })
+
+  it('stop while paused resumes the context so future plays are audible', async () => {
+    await engine.playSequence(['a.mp3'])
+    engine.pause()
+    engine.stop()
+    expect(ctx.state).toBe('running')
+    expect(get(engine.paused)).toBe(false)
   })
 
   it('fadeOut ramps gain to zero and clears nowPlaying', async () => {
