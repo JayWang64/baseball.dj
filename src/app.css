@@ -213,8 +213,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .lineup-name { flex: 1; min-width: 0; font-weight: 700; font-size: 17px; letter-spacing: .4px; }
 .lineup-name small { display: block; font-weight: 500; font-size: 12px; color: var(--chalk-dim); }
 .lineup-num { font-family: var(--display); color: var(--amber); font-size: 15px; }
-.lineup-move { display: flex; gap: 4px; }
-.lineup-move .btn { padding: 8px 12px; font-size: 16px; line-height: 1; }
+.lineup-row.dragging {
+  border-color: var(--amber);
+  box-shadow: 0 0 18px var(--amber-glow);
+  transform: scale(1.02);
+  z-index: 5; position: relative;
+}
+.drag-handle {
+  flex: none; padding: 6px 10px; margin: -6px -4px -6px -8px;
+  font-size: 22px; line-height: 1; color: var(--chalk-faint);
+  cursor: grab; touch-action: none;
+}
+.bench-row { width: 100%; text-align: left; opacity: .75; }
+.bench-row:active { transform: scale(.98); }
+.remove-btn { padding: 8px 12px; font-size: 14px; line-height: 1; color: var(--chalk-dim); }
+.lock-bar { display: flex; gap: 8px; margin-top: 14px; }
+.lock-bar .btn { flex: 1; padding: 14px; }
 .warn-chip {
   font-size: 11px; font-weight: 700; letter-spacing: .5px;
   color: var(--clay); border: 1px solid var(--clay); border-radius: 8px;

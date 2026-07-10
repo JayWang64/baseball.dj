@@ -1,7 +1,9 @@
 import { writable, get } from 'svelte/store'
 
+const EMPTY = { order: [], batterIndex: 0, locked: false }
+
 export function createLineup(storage) {
-  const store = writable({ order: [], batterIndex: 0 })
+  const store = writable({ ...EMPTY })
   let key = null
 
   function set(state) {
@@ -13,7 +15,7 @@ export function createLineup(storage) {
   function init(teamKey) {
     key = `dj.lineup.${teamKey}`
     const raw = storage.getItem(key)
-    store.set(raw ? JSON.parse(raw) : { order: [], batterIndex: 0 })
+    store.set(raw ? { ...EMPTY, ...JSON.parse(raw) } : { ...EMPTY })
   }
 
   function toggle(name) {
@@ -39,6 +41,21 @@ export function createLineup(storage) {
     })
   }
 
+  // drag-to-reorder: move `name` to the slot currently held by `targetName`
+  function reorder(name, targetName) {
+    update((s) => {
+      const from = s.order.indexOf(name)
+      const to = s.order.indexOf(targetName)
+      if (from === -1 || to === -1 || from === to) return s
+      const order = [...s.order]
+      order.splice(from, 1)
+      order.splice(to, 0, name)
+      return { ...s, order }
+    })
+  }
+
+  const setLocked = (locked) => update((s) => ({ ...s, locked }))
+
   const advance = () =>
     update((s) =>
       s.order.length ? { ...s, batterIndex: (s.batterIndex + 1) % s.order.length } : s
@@ -51,7 +68,7 @@ export function createLineup(storage) {
     )
   const resetGame = () => update((s) => ({ ...s, batterIndex: 0 }))
 
-  return { subscribe: store.subscribe, init, toggle, move, advance, back, resetGame }
+  return { subscribe: store.subscribe, init, toggle, move, reorder, setLocked, advance, back, resetGame }
 }
 
 export const lineup = createLineup(

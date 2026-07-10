@@ -77,9 +77,30 @@ describe('lineup store', () => {
     lineup.advance()
     const fresh = createLineup(storage)
     fresh.init('mdba/9u-red-sox')
-    expect(get(fresh)).toEqual({ order: ['Max'], batterIndex: 0 })
+    expect(get(fresh)).toEqual({ order: ['Max'], batterIndex: 0, locked: false })
     const other = createLineup(storage)
     other.init('mdba/other-team')
     expect(get(other).order).toEqual([])
+  })
+
+  it('reorder moves a player to the target slot', () => {
+    lineup.toggle('Max')
+    lineup.toggle('Ajith')
+    lineup.toggle('Theo')
+    lineup.toggle('Hugo')
+    lineup.reorder('Hugo', 'Ajith') // drag Hugo up onto Ajith's slot
+    expect(get(lineup).order).toEqual(['Max', 'Hugo', 'Ajith', 'Theo'])
+    lineup.reorder('Max', 'Theo') // drag Max down onto Theo's slot
+    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
+    lineup.reorder('Max', 'Nobody') // unknown target is a no-op
+    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
+  })
+
+  it('persists the locked flag', () => {
+    lineup.toggle('Max')
+    lineup.setLocked(true)
+    const fresh = createLineup(storage)
+    fresh.init('mdba/9u-red-sox')
+    expect(get(fresh).locked).toBe(true)
   })
 })
