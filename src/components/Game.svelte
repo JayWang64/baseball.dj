@@ -19,14 +19,18 @@
     batter ? [batter.intro, batter.walkup?.url].filter(Boolean) : []
   )
   const playing = $derived(!!$nowPlaying)
+  // pause/resume only apply when the CURRENT batter's audio is what's loaded;
+  // otherwise ▶ starts this batter's song (e.g. right after NEXT)
+  const batterActive = $derived(
+    playing && batterUrls.length > 0 && batterUrls.includes($nowPlaying.urls[0])
+  )
 
   function onPlayPause() {
-    if (!playing) {
-      if (batterUrls.length) engine.playSequence(batterUrls, { onDone: () => lineup.advance() })
-    } else if ($paused) {
-      engine.resume()
-    } else {
-      engine.pause()
+    if (batterActive) {
+      if ($paused) engine.resume()
+      else engine.pause()
+    } else if (batterUrls.length) {
+      engine.playSequence(batterUrls, { onDone: () => lineup.advance() })
     }
   }
 </script>
@@ -36,7 +40,7 @@
 {#if !batter}
   <div class="panel">No lineup yet — set today's batting order on the Lineup tab.</div>
 {:else}
-  <div class="panel now-panel" class:playing={playing && !$paused}>
+  <div class="panel now-panel" class:playing={batterActive && !$paused}>
     <div class="now-info">
       <div class="batter-label">NOW BATTING</div>
       <div class="batter-name">{batter.name}</div>
@@ -52,11 +56,11 @@
     <div class="transport">
       <button
         class="t-btn t-play"
-        disabled={!playing && !batterUrls.length}
+        disabled={!batterUrls.length}
         onclick={onPlayPause}
-        aria-label={playing && !$paused ? 'Pause' : 'Play'}
+        aria-label={batterActive && !$paused ? 'Pause' : 'Play'}
       >
-        {#if playing && !$paused}
+        {#if batterActive && !$paused}
           <svg viewBox="0 0 24 24"><path d="M6 5h4.4v14H6zM13.6 5H18v14h-4.4z" fill="currentColor"/></svg>
         {:else}
           <svg viewBox="0 0 24 24"><path d="M8 5v14l12-7z" fill="currentColor"/></svg>
