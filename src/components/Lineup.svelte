@@ -22,7 +22,6 @@
   function dragStart(e, name) {
     e.preventDefault()
     dragging = name
-    e.currentTarget.setPointerCapture(e.pointerId)
   }
 
   function dragMove(e) {
@@ -36,6 +35,9 @@
     dragging = null
   }
 </script>
+
+<!-- release anywhere ends the drag — not just over the handle -->
+<svelte:window onpointermove={dragMove} onpointerup={dragEnd} onpointercancel={dragEnd} />
 
 <h1 class="screen-title">TODAY'S LINEUP</h1>
 
@@ -59,7 +61,7 @@
           {#if p.walkup?.placeholder}<span class="warn-chip">song pending</span>{/if}
           {#if p.walkup}<small>{p.walkup.title}</small>{/if}
         </span>
-        {#if p.number != null}<span class="lineup-num">#{p.number}</span>{/if}
+        <span class="lineup-num" class:dim={p.number == null}>#{p.number ?? '?'}</span>
       </div>
     {/each}
   </div>
@@ -89,13 +91,7 @@
           onchange={() => lineup.toggle(p.name)}
           title={absent ? 'Absent — check to put back in' : 'Attending — uncheck if absent'}
         />
-        <span
-          class="drag-handle"
-          onpointerdown={(e) => dragStart(e, p.name)}
-          onpointermove={dragMove}
-          onpointerup={dragEnd}
-          onpointercancel={dragEnd}
-        >≡</span>
+        <span class="drag-handle" onpointerdown={(e) => dragStart(e, p.name)}>≡</span>
         <span class="lineup-order">{absent ? '–' : rank}</span>
         <span class="lineup-name">
           {p.name}
@@ -103,7 +99,7 @@
           {#if p.walkup?.placeholder}<span class="warn-chip">song pending</span>{/if}
           {#if p.walkup}<small>{p.walkup.title}</small>{/if}
         </span>
-        {#if p.number != null}<span class="lineup-num">#{p.number}</span>{/if}
+        <span class="lineup-num" class:dim={p.number == null}>#{p.number ?? '?'}</span>
       </div>
     {/each}
   </div>
