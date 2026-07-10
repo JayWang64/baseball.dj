@@ -6,6 +6,7 @@
   import Lineup from './components/Lineup.svelte'
   import Game from './components/Game.svelte'
   import { engine } from './lib/audio.js'
+  import { fieldReady } from './lib/pwa.js'
 
   const armed = engine.armed
   let tab = $state(localStorage.getItem('dj.tab') || 'lineup')
@@ -33,6 +34,9 @@
         <span class="brand-text">BASEBALL.DJ</span>
         <span class="brand-sub">{$currentTeam.team.name}</span>
       </button>
+      <span class="net-badge" class:ready={$fieldReady} title={$fieldReady ? 'All songs cached — works with no signal' : 'Still downloading songs — stay on wifi'}>
+        {$fieldReady ? '⚡ FIELD READY' : '⏳ CACHING…'}
+      </span>
     </div>
   </header>
 
