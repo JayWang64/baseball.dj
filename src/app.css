@@ -224,16 +224,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   font-size: 22px; line-height: 1; color: var(--chalk-faint);
   cursor: grab; touch-action: none;
 }
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 10px; margin-bottom: 10px;
+.attend {
+  flex: none; width: 24px; height: 24px;
+  accent-color: var(--amber);
+  cursor: pointer;
 }
-.panel-head .panel-title { margin-bottom: 0; }
-.add-all-btn { padding: 7px 12px; font-size: 13px; letter-spacing: 1px; }
-.bench-row { width: 100%; text-align: left; opacity: .75; }
-.bench-row:active { transform: scale(.98); }
-.remove-btn { padding: 8px 12px; font-size: 14px; line-height: 1; color: var(--chalk-dim); }
-.lock-bar { display: flex; gap: 8px; margin-top: 14px; }
+.absent-row { opacity: .55; }
+.lock-bar { display: flex; gap: 8px; margin-bottom: 14px; }
 .lock-bar .btn { flex: 1; padding: 14px; }
 .warn-chip {
   font-size: 11px; font-weight: 700; letter-spacing: .5px;

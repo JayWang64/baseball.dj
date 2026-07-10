@@ -12,10 +12,11 @@ export function createLineup(storage) {
   }
   const update = (fn) => set(fn(get(store)))
 
-  function init(teamKey) {
-    key = `dj.lineup.${teamKey}`
+  // everyone attends by default: first load seeds the order with the full roster
+  function init(teamKey, roster = []) {
+    key = `dj.lineup2.${teamKey}` // v2: attendance model (all present by default)
     const raw = storage.getItem(key)
-    store.set(raw ? { ...EMPTY, ...JSON.parse(raw) } : { ...EMPTY })
+    store.set(raw ? { ...EMPTY, ...JSON.parse(raw) } : { ...EMPTY, order: [...roster] })
   }
 
   function toggle(name) {
@@ -56,13 +57,6 @@ export function createLineup(storage) {
 
   const setLocked = (locked) => update((s) => ({ ...s, locked }))
 
-  // append every name not already in the order (bench "add all")
-  const addAll = (names) =>
-    update((s) => ({
-      ...s,
-      order: [...s.order, ...names.filter((n) => !s.order.includes(n))],
-    }))
-
   const advance = () =>
     update((s) =>
       s.order.length ? { ...s, batterIndex: (s.batterIndex + 1) % s.order.length } : s
@@ -75,7 +69,7 @@ export function createLineup(storage) {
     )
   const resetGame = () => update((s) => ({ ...s, batterIndex: 0 }))
 
-  return { subscribe: store.subscribe, init, toggle, move, reorder, setLocked, addAll, advance, back, resetGame }
+  return { subscribe: store.subscribe, init, toggle, move, reorder, setLocked, advance, back, resetGame }
 }
 
 export const lineup = createLineup(

@@ -15,7 +15,11 @@
   }
 
   $effect(() => {
-    if ($currentTeam) lineup.init(teamKey($currentTeam))
+    if ($currentTeam)
+      lineup.init(
+        teamKey($currentTeam),
+        $currentTeam.team.players.map((p) => p.name)
+      )
   })
 </script>
 
