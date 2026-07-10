@@ -47,7 +47,7 @@
 
   <div class="batter-nav">
     <button class="btn" onclick={() => lineup.back()}>‹ BACK</button>
-    <button class="btn" onclick={() => lineup.advance()}>SKIP ›</button>
+    <button class="btn" onclick={() => lineup.advance()}>NEXT ›</button>
   </div>
 
   {#if onDeck}
