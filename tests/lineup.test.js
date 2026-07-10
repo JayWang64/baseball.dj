@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { get } from 'svelte/store'
-import { createLineup } from '../src/lib/lineup.js'
+import { createLineup, presentNames } from '../src/lib/lineup.js'
 
 function fakeStorage() {
   const m = new Map()
@@ -10,40 +10,49 @@ function fakeStorage() {
   }
 }
 
+const ROSTER = ['Max', 'Ajith', 'Theo', 'Hugo']
+
 let storage, lineup
 
 beforeEach(() => {
   storage = fakeStorage()
   lineup = createLineup(storage)
-  lineup.init('mdba/9u-red-sox')
+  lineup.init('mdba/9u-red-sox', ROSTER)
 })
 
-describe('lineup store', () => {
-  it('toggle adds players in tap order and removes them', () => {
-    lineup.toggle('Max')
-    lineup.toggle('Ajith')
-    lineup.toggle('Theo')
-    expect(get(lineup).order).toEqual(['Max', 'Ajith', 'Theo'])
-    lineup.toggle('Ajith')
-    expect(get(lineup).order).toEqual(['Max', 'Theo'])
+describe('lineup store (attendance model)', () => {
+  it('seeds the full roster as present on first load', () => {
+    expect(get(lineup).order).toEqual(ROSTER)
+    expect(get(lineup).absent).toEqual([])
   })
 
-  it('move swaps neighbors and clamps at the ends', () => {
-    lineup.toggle('Max')
+  it('toggle marks a kid absent in place — the order never changes', () => {
     lineup.toggle('Ajith')
-    lineup.toggle('Theo')
-    lineup.move('Theo', -1)
-    expect(get(lineup).order).toEqual(['Max', 'Theo', 'Ajith'])
-    lineup.move('Max', -1)
-    expect(get(lineup).order).toEqual(['Max', 'Theo', 'Ajith'])
-    lineup.move('Ajith', 1)
-    expect(get(lineup).order).toEqual(['Max', 'Theo', 'Ajith'])
+    expect(get(lineup).order).toEqual(ROSTER)
+    expect(get(lineup).absent).toEqual(['Ajith'])
+    expect(presentNames(get(lineup))).toEqual(['Max', 'Theo', 'Hugo'])
+    lineup.toggle('Ajith')
+    expect(get(lineup).absent).toEqual([])
   })
 
-  it('advance and back wrap around the order', () => {
-    lineup.toggle('Max')
+  it('selectAll clears all absences', () => {
     lineup.toggle('Ajith')
-    lineup.toggle('Theo')
+    lineup.toggle('Hugo')
+    lineup.selectAll()
+    expect(get(lineup).absent).toEqual([])
+  })
+
+  it('reorder moves a kid to the target slot', () => {
+    lineup.reorder('Hugo', 'Ajith')
+    expect(get(lineup).order).toEqual(['Max', 'Hugo', 'Ajith', 'Theo'])
+    lineup.reorder('Max', 'Theo')
+    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
+    lineup.reorder('Max', 'Nobody')
+    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
+  })
+
+  it('advance and back wrap around the PRESENT kids only', () => {
+    lineup.toggle('Ajith') // present: Max, Theo, Hugo
     lineup.advance()
     expect(get(lineup).batterIndex).toBe(1)
     lineup.advance()
@@ -53,64 +62,28 @@ describe('lineup store', () => {
     expect(get(lineup).batterIndex).toBe(2)
   })
 
-  it('adjusts batterIndex when a player before the current batter is removed', () => {
-    lineup.toggle('Max')
-    lineup.toggle('Ajith')
-    lineup.toggle('Theo')
+  it('clamps batterIndex when the count of present kids shrinks below it', () => {
     lineup.advance()
-    lineup.advance() // batting: Theo (index 2)
-    lineup.toggle('Max') // remove someone earlier in the order
-    expect(get(lineup).order).toEqual(['Ajith', 'Theo'])
-    expect(get(lineup).batterIndex).toBe(1) // still Theo
-  })
-
-  it('resets batterIndex to 0 when the current batter is removed past the end', () => {
-    lineup.toggle('Max')
+    lineup.advance()
+    lineup.advance() // batterIndex 3
     lineup.toggle('Ajith')
-    lineup.advance() // batting Ajith (index 1)
-    lineup.toggle('Ajith')
+    lineup.toggle('Hugo') // 2 present, index 3 invalid
     expect(get(lineup).batterIndex).toBe(0)
   })
 
-  it('round-trips through storage per team key', () => {
-    lineup.toggle('Max')
-    lineup.advance()
-    const fresh = createLineup(storage)
-    fresh.init('mdba/9u-red-sox')
-    expect(get(fresh)).toEqual({ order: ['Max'], batterIndex: 0, locked: false })
-    const other = createLineup(storage)
-    other.init('mdba/other-team')
-    expect(get(other).order).toEqual([])
-  })
-
-  it('reorder moves a player to the target slot', () => {
-    lineup.toggle('Max')
-    lineup.toggle('Ajith')
+  it('round-trips through storage; saved state wins over roster default', () => {
     lineup.toggle('Theo')
-    lineup.toggle('Hugo')
-    lineup.reorder('Hugo', 'Ajith') // drag Hugo up onto Ajith's slot
-    expect(get(lineup).order).toEqual(['Max', 'Hugo', 'Ajith', 'Theo'])
-    lineup.reorder('Max', 'Theo') // drag Max down onto Theo's slot
-    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
-    lineup.reorder('Max', 'Nobody') // unknown target is a no-op
-    expect(get(lineup).order).toEqual(['Hugo', 'Ajith', 'Theo', 'Max'])
-  })
-
-  it('seeds the full roster as present on first load, but saved state wins later', () => {
+    lineup.reorder('Hugo', 'Max')
     const fresh = createLineup(storage)
-    fresh.init('mdba/new-team', ['Ajith', 'Blake', 'Hugo'])
-    expect(get(fresh).order).toEqual(['Ajith', 'Blake', 'Hugo'])
-    fresh.toggle('Blake') // mark absent
-    const reloaded = createLineup(storage)
-    reloaded.init('mdba/new-team', ['Ajith', 'Blake', 'Hugo'])
-    expect(get(reloaded).order).toEqual(['Ajith', 'Hugo'])
+    fresh.init('mdba/9u-red-sox', ROSTER)
+    expect(get(fresh).order).toEqual(['Hugo', 'Max', 'Ajith', 'Theo'])
+    expect(get(fresh).absent).toEqual(['Theo'])
   })
 
   it('persists the locked flag', () => {
-    lineup.toggle('Max')
     lineup.setLocked(true)
     const fresh = createLineup(storage)
-    fresh.init('mdba/9u-red-sox')
+    fresh.init('mdba/9u-red-sox', ROSTER)
     expect(get(fresh).locked).toBe(true)
   })
 })
