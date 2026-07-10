@@ -230,7 +230,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   cursor: pointer;
 }
 .absent-row { opacity: .55; }
-.lock-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+.lock-bar {
+  position: sticky; top: 62px; z-index: 40;
+  display: flex; gap: 8px; margin-bottom: 14px;
+  padding: 8px;
+  background: linear-gradient(180deg, var(--green-800), var(--green-900));
+  border: 1.5px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
 .lock-bar .btn { flex: 1; padding: 14px; }
 .warn-chip {
   font-size: 11px; font-weight: 700; letter-spacing: .5px;
