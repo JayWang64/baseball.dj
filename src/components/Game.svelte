@@ -1,4 +1,5 @@
 <script>
+  import { fly, fade } from 'svelte/transition'
   import { lineup } from '../lib/lineup.js'
   import { engine } from '../lib/audio.js'
   import CheerGrid from './CheerGrid.svelte'
@@ -49,9 +50,11 @@
     lineup.back()
   }
   function jump(i) {
-    if (i === $lineup.batterIndex) return
-    stopBatterSong()
-    lineup.jumpTo(i)
+    if (i !== $lineup.batterIndex) {
+      stopBatterSong()
+      lineup.jumpTo(i)
+    }
+    orderOpen = false
   }
 </script>
 
@@ -107,21 +110,34 @@
     </button>
   </div>
 
-  <div class="panel order-panel">
-    <button class="collapse-head" onclick={() => (orderOpen = !orderOpen)}>
-      <span class="panel-title">BATTING ORDER</span>
-      <span class="collapse-caret">{orderOpen ? '▾' : '▸'}</span>
-    </button>
-    {#if orderOpen}
-      {#each present as name, i (name)}
-        <button class="jump-row" class:active={i === $lineup.batterIndex} onclick={() => jump(i)}>
-          <span class="lineup-order">{i + 1}</span>
-          <span class="lineup-name">{name}</span>
-          {#if i === $lineup.batterIndex}<span class="at-bat">AT BAT</span>{/if}
-        </button>
-      {/each}
-    {/if}
-  </div>
 {/if}
 
 <CheerGrid cheers={team.cheers} />
+
+{#if batter}
+  <button class="order-fab" onclick={() => (orderOpen = true)} aria-label="Batting order">
+    <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/><text x="2" y="9" font-size="8" fill="currentColor" font-weight="bold">1</text><text x="2" y="21" font-size="8" fill="currentColor" font-weight="bold">2</text></svg>
+    <span>ORDER</span>
+  </button>
+
+  {#if orderOpen}
+    <div
+      class="drawer-backdrop"
+      transition:fade={{ duration: 120 }}
+      onclick={() => (orderOpen = false)}
+      role="presentation"
+    ></div>
+    <aside class="order-drawer" transition:fly={{ x: -320, duration: 180 }}>
+      <div class="panel-title">BATTING ORDER · TAP TO JUMP</div>
+      <div class="order-drawer-list">
+        {#each present as name, i (name)}
+          <button class="jump-row" class:active={i === $lineup.batterIndex} onclick={() => jump(i)}>
+            <span class="lineup-order">{i + 1}</span>
+            <span class="lineup-name">{name}</span>
+            {#if i === $lineup.batterIndex}<span class="at-bat">AT BAT</span>{/if}
+          </button>
+        {/each}
+      </div>
+    </aside>
+  {/if}
+{/if}

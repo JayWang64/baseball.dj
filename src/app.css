@@ -297,14 +297,38 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .ondeck { text-align: center; margin-top: 10px; font-size: 13px; color: var(--chalk-dim); }
 .ondeck b { color: var(--chalk); }
 
-/* collapsible batting order */
-.order-panel { padding-top: 6px; padding-bottom: 8px; }
-.collapse-head {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 2px;
+/* floating batting-order drawer */
+.order-fab {
+  position: fixed; left: 12px; bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 70;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 58px; height: 58px; border-radius: 16px;
+  border: 1.5px solid var(--line-strong);
+  background: linear-gradient(180deg, #16201b, #0d1511);
+  color: var(--amber);
+  font-size: 9px; font-weight: 800; letter-spacing: 1px;
+  box-shadow: var(--shadow);
+  justify-content: center;
 }
-.collapse-head .panel-title { margin-bottom: 0; }
-.collapse-caret { color: var(--amber); font-size: 16px; }
+.order-fab svg { width: 22px; height: 22px; }
+.order-fab:active { transform: scale(.93); }
+
+.drawer-backdrop {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(6, 18, 13, 0.6);
+  backdrop-filter: blur(2px);
+  border: 0;
+}
+.order-drawer {
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 85;
+  width: min(78vw, 300px);
+  padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(180deg, var(--green-800), var(--green-950));
+  border-right: 2px solid var(--line-strong);
+  box-shadow: 12px 0 40px rgba(0,0,0,.5);
+}
+.order-drawer-list { overflow-y: auto; flex: 1; }
 .jump-row {
   width: 100%; display: flex; align-items: center; gap: 10px;
   padding: 8px 10px; border-radius: 10px; text-align: left;
