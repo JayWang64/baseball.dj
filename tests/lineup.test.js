@@ -80,6 +80,16 @@ describe('lineup store (attendance model)', () => {
     expect(get(fresh).absent).toEqual(['Theo'])
   })
 
+  it('jumpTo selects a present batter by index and ignores out-of-range', () => {
+    lineup.toggle('Ajith') // present: Max, Theo, Hugo
+    lineup.jumpTo(2)
+    expect(get(lineup).batterIndex).toBe(2)
+    lineup.jumpTo(5)
+    expect(get(lineup).batterIndex).toBe(2)
+    lineup.jumpTo(-1)
+    expect(get(lineup).batterIndex).toBe(2)
+  })
+
   it('persists the locked flag', () => {
     lineup.setLocked(true)
     const fresh = createLineup(storage)

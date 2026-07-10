@@ -69,7 +69,15 @@ export function createLineup(storage) {
     })
   const resetGame = () => update((s) => ({ ...s, batterIndex: 0 }))
 
-  return { subscribe: store.subscribe, init, toggle, selectAll, reorder, setLocked, advance, back, resetGame }
+  // jump straight to the i-th present batter (missed kid, catch-up, etc.)
+  const jumpTo = (i) =>
+    update((s) => {
+      const count = presentNames(s).length
+      if (!count || i < 0 || i >= count) return s
+      return { ...s, batterIndex: i }
+    })
+
+  return { subscribe: store.subscribe, init, toggle, selectAll, reorder, setLocked, advance, back, resetGame, jumpTo }
 }
 
 export const lineup = createLineup(
