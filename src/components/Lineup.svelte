@@ -1,20 +1,23 @@
 <script>
+  import { flip } from 'svelte/animate'
   import { lineup } from '../lib/lineup.js'
 
   let { team } = $props()
 
   let dragging = $state(null)
 
-  const inOrder = $derived(
-    $lineup.order
-      .map((name) => team.players.find((p) => p.name === name))
+  const rows = $derived.by(() => {
+    let rank = 0
+    return $lineup.order
+      .map((name) => {
+        const p = team.players.find((pp) => pp.name === name)
+        if (!p) return null
+        const absent = $lineup.absent.includes(name)
+        return { p, absent, rank: absent ? null : ++rank }
+      })
       .filter(Boolean)
-  )
-  const absent = $derived(
-    team.players
-      .filter((p) => !$lineup.order.includes(p.name))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  )
+  })
+  const presentRows = $derived(rows.filter((r) => !r.absent))
 
   function dragStart(e, name) {
     e.preventDefault()
@@ -39,17 +42,17 @@
 {#if $lineup.locked}
   <div class="lock-bar">
     <button class="btn" onclick={() => lineup.setLocked(false)}>✎ EDIT LINEUP</button>
-    <button class="btn danger" onclick={() => lineup.resetGame()}>RESET TO TOP OF ORDER</button>
+    <button class="btn danger" onclick={() => lineup.resetGame()}>RESET ORDER</button>
   </div>
 
   <div class="panel">
     <div class="panel-title">BATTING ORDER · LOCKED</div>
-    {#if !inOrder.length}
+    {#if !presentRows.length}
       <div class="toast-warn">no lineup set — unlock to build one</div>
     {/if}
-    {#each inOrder as p, i (p.name)}
+    {#each presentRows as { p, rank } (p.name)}
       <div class="lineup-row in">
-        <span class="lineup-order">{i + 1}</span>
+        <span class="lineup-order">{rank}</span>
         <span class="lineup-name">
           {p.name}
           {#if !p.walkup}<span class="warn-chip">no song</span>{/if}
@@ -62,24 +65,29 @@
   </div>
 {:else}
   <div class="lock-bar">
-    <button class="btn amber" disabled={!inOrder.length} onclick={() => lineup.setLocked(true)}>
-      🔒 LOCK LINEUP
+    <button class="btn" onclick={() => lineup.selectAll()}>✓ SELECT ALL</button>
+    <button class="btn amber lock-btn" disabled={!presentRows.length} onclick={() => lineup.setLocked(true)}>
+      🔒 LOCK
     </button>
   </div>
 
   <div class="panel">
-    <div class="panel-title">BATTING ORDER · DRAG ≡ TO REORDER · UNCHECK IF ABSENT</div>
-    {#if !inOrder.length}
-      <div class="toast-warn">everyone is marked absent — check kids back in below</div>
-    {/if}
-    {#each inOrder as p, i (p.name)}
-      <div class="lineup-row in" class:dragging={dragging === p.name} data-player={p.name}>
+    <div class="panel-title">DRAG ≡ TO REORDER · UNCHECK IF ABSENT</div>
+    {#each rows as { p, absent, rank } (p.name)}
+      <div
+        class="lineup-row"
+        class:in={!absent}
+        class:absent-row={absent}
+        class:dragging={dragging === p.name}
+        data-player={p.name}
+        animate:flip={{ duration: 150 }}
+      >
         <input
           type="checkbox"
           class="attend"
-          checked
+          checked={!absent}
           onchange={() => lineup.toggle(p.name)}
-          title="Attending — uncheck if absent"
+          title={absent ? 'Absent — check to put back in' : 'Attending — uncheck if absent'}
         />
         <span
           class="drag-handle"
@@ -88,7 +96,7 @@
           onpointerup={dragEnd}
           onpointercancel={dragEnd}
         >≡</span>
-        <span class="lineup-order">{i + 1}</span>
+        <span class="lineup-order">{absent ? '–' : rank}</span>
         <span class="lineup-name">
           {p.name}
           {#if !p.walkup}<span class="warn-chip">no song</span>{/if}
@@ -99,22 +107,4 @@
       </div>
     {/each}
   </div>
-
-  {#if absent.length}
-    <div class="panel">
-      <div class="panel-title">ABSENT TODAY · CHECK TO PUT BACK IN</div>
-      {#each absent as p (p.name)}
-        <div class="lineup-row absent-row">
-          <input
-            type="checkbox"
-            class="attend"
-            onchange={() => lineup.toggle(p.name)}
-            title="Absent — check to add back to the order"
-          />
-          <span class="lineup-name">{p.name}</span>
-          {#if p.number != null}<span class="lineup-num">#{p.number}</span>{/if}
-        </div>
-      {/each}
-    </div>
-  {/if}
 {/if}

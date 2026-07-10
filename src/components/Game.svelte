@@ -6,12 +6,13 @@
   let { team } = $props()
   const nowPlaying = engine.nowPlaying
 
-  const batterName = $derived($lineup.order[$lineup.batterIndex] ?? null)
+  const present = $derived(
+    $lineup.order.filter((n) => !$lineup.absent.includes(n))
+  )
+  const batterName = $derived(present[$lineup.batterIndex] ?? null)
   const batter = $derived(team.players.find((p) => p.name === batterName) ?? null)
   const onDeck = $derived(
-    $lineup.order.length > 1
-      ? $lineup.order[($lineup.batterIndex + 1) % $lineup.order.length]
-      : null
+    present.length > 1 ? present[($lineup.batterIndex + 1) % present.length] : null
   )
   const batterUrls = $derived(
     batter ? [batter.intro, batter.walkup?.url].filter(Boolean) : []

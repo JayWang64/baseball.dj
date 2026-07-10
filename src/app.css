@@ -239,7 +239,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   border-radius: 16px;
   box-shadow: var(--shadow);
 }
-.lock-bar .btn { flex: 1; padding: 14px; }
+.lock-bar .btn { flex: 1.5; padding: 10px 12px; }
+.lock-bar .lock-btn { flex: 1; }
 .warn-chip {
   font-size: 11px; font-weight: 700; letter-spacing: .5px;
   color: var(--clay); border: 1px solid var(--clay); border-radius: 8px;

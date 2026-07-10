@@ -1,6 +1,12 @@
 import { writable, get } from 'svelte/store'
 
-const EMPTY = { order: [], batterIndex: 0, locked: false }
+// order always holds the FULL roster (drag to arrange); absence is a separate
+// flag so unchecked kids keep their slot on screen instead of jumping around.
+const EMPTY = { order: [], absent: [], batterIndex: 0, locked: false }
+
+export function presentNames(state) {
+  return state.order.filter((n) => !state.absent.includes(n))
+}
 
 export function createLineup(storage) {
   const store = writable({ ...EMPTY })
@@ -12,35 +18,29 @@ export function createLineup(storage) {
   }
   const update = (fn) => set(fn(get(store)))
 
+  const clamp = (s) => {
+    const count = presentNames(s).length
+    return s.batterIndex >= count ? { ...s, batterIndex: 0 } : s
+  }
+
   // everyone attends by default: first load seeds the order with the full roster
   function init(teamKey, roster = []) {
-    key = `dj.lineup2.${teamKey}` // v2: attendance model (all present by default)
+    key = `dj.lineup3.${teamKey}` // v3: full-roster order + absent list
     const raw = storage.getItem(key)
     store.set(raw ? { ...EMPTY, ...JSON.parse(raw) } : { ...EMPTY, order: [...roster] })
   }
 
+  // flip attendance in place — the kid keeps their slot in the order
   function toggle(name) {
     update((s) => {
-      const i = s.order.indexOf(name)
-      if (i === -1) return { ...s, order: [...s.order, name] }
-      const order = s.order.filter((n) => n !== name)
-      let batterIndex = s.batterIndex
-      if (i < batterIndex) batterIndex -= 1
-      if (batterIndex >= order.length) batterIndex = 0
-      return { order, batterIndex }
+      const absent = s.absent.includes(name)
+        ? s.absent.filter((n) => n !== name)
+        : [...s.absent, name]
+      return clamp({ ...s, absent })
     })
   }
 
-  function move(name, delta) {
-    update((s) => {
-      const i = s.order.indexOf(name)
-      const j = i + delta
-      if (i === -1 || j < 0 || j >= s.order.length) return s
-      const order = [...s.order]
-      ;[order[i], order[j]] = [order[j], order[i]]
-      return { ...s, order }
-    })
-  }
+  const selectAll = () => update((s) => ({ ...s, absent: [] }))
 
   // drag-to-reorder: move `name` to the slot currently held by `targetName`
   function reorder(name, targetName) {
@@ -58,18 +58,18 @@ export function createLineup(storage) {
   const setLocked = (locked) => update((s) => ({ ...s, locked }))
 
   const advance = () =>
-    update((s) =>
-      s.order.length ? { ...s, batterIndex: (s.batterIndex + 1) % s.order.length } : s
-    )
+    update((s) => {
+      const count = presentNames(s).length
+      return count ? { ...s, batterIndex: (s.batterIndex + 1) % count } : s
+    })
   const back = () =>
-    update((s) =>
-      s.order.length
-        ? { ...s, batterIndex: (s.batterIndex - 1 + s.order.length) % s.order.length }
-        : s
-    )
+    update((s) => {
+      const count = presentNames(s).length
+      return count ? { ...s, batterIndex: (s.batterIndex - 1 + count) % count } : s
+    })
   const resetGame = () => update((s) => ({ ...s, batterIndex: 0 }))
 
-  return { subscribe: store.subscribe, init, toggle, move, reorder, setLocked, advance, back, resetGame }
+  return { subscribe: store.subscribe, init, toggle, selectAll, reorder, setLocked, advance, back, resetGame }
 }
 
 export const lineup = createLineup(
