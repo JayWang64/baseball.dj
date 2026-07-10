@@ -1,0 +1,18 @@
+{
+  "name": "9U Red Sox",
+  "players": [
+    { "name": "Ajith", "number": 8 },
+    { "name": "Blake", "number": null },
+    { "name": "Hugo", "number": 1 },
+    { "name": "Joshua", "number": 11 },
+    { "name": "Lincoln", "number": 21 },
+    { "name": "Max", "number": 7 },
+    { "name": "Nathan", "number": 6 },
+    { "name": "Ray", "number": 4 },
+    { "name": "Shayen", "number": null },
+    { "name": "Theo", "number": 10 },
+    { "name": "Tobias", "number": 12 },
+    { "name": "Xavier", "number": 3 },
+    { "name": "Zachary", "number": 2 }
+  ]
+}

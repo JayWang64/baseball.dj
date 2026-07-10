@@ -1,0 +1,25 @@
+{
+  "name": "baseball.dj",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/build-manifest.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/build-manifest.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "svelte": "^5.56.4",
+    "vite": "^8.1.4",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@fontsource/barlow-semi-condensed": "^5.2.7",
+    "@fontsource/graduate": "^5.2.7"
+  }
+}
