@@ -18,8 +18,9 @@ speaker their phone is paired to.
 
 ## Architecture
 
-Static single-page PWA — **Vite + Svelte** — deployed to **Cloudflare
-Pages** on git push. No backend, no database, $0/month hosting.
+Static single-page PWA — **Vite + Svelte** — deployed to **GitHub Pages**
+from `github.com/JayWang64/baseball.dj` via a GitHub Actions workflow on
+push. No backend, no database, $0/month hosting.
 
 - All audio ships with the site. A service worker precaches the full app
   + audio so it works fully offline at the field after one load at home.
@@ -33,19 +34,29 @@ Pages** on git push. No backend, no database, $0/month hosting.
 ## Repo layout
 
 ```
-audio/
-  walkup/<player>.mp3     # ~20s normalized clips (seeded from songs/)
-  intros/<player>.mp3     # AI announcer intros (generated)
-  cheers/<clip>.mp3       # cheer/event clips (seeded from songs/_cheer - *.mp3)
-roster.json               # source of truth for players
+leagues/
+  mdba/                          # league (slug folder)
+    league.json                  # display name, etc.
+    9u-red-sox/                  # team (slug folder)
+      roster.json                # source of truth for this team's players
+      walkup/<player>.mp3        # ~20s normalized clips (seeded from songs/)
+      intros/<player>.mp3       # AI announcer intros (generated)
+      cheers/<clip>.mp3          # team-specific cheers (optional)
+shared/
+  cheers/<clip>.mp3              # cheers available to every team (YMCA, Charge…)
 scripts/
-  generate-intros.mjs     # TTS intro generation (ElevenLabs)
-  build-manifest.mjs      # folders + roster.json -> src/manifest.json
-src/                      # Svelte app
-docs/superpowers/specs/   # this doc
-.claude/skills/walkup-song-clip/   # moved from old repo; clip pipeline lives here
-old/                      # legacy Dugout app, reference only (gitignored or kept read-only)
+  generate-intros.mjs            # TTS intro generation (ElevenLabs)
+  build-manifest.mjs             # leagues/* + shared/* -> src/manifest.json
+src/                             # Svelte app
+docs/superpowers/specs/          # this doc
+.claude/skills/walkup-song-clip/ # moved from old repo; clip pipeline lives here
+old/                             # legacy Dugout app, reference only (gitignored)
 ```
+
+**Adding a future team/league = create folders + roster.json, push.**
+No code changes: the manifest build discovers every
+`leagues/<league>/<team>/` folder. Generic cheers live once in
+`shared/cheers/`; a team folder can add its own on top.
 
 ## Roster
 
@@ -75,10 +86,19 @@ after the number is added picks it up automatically.
    drop file → push.
 4. **Seed content:** copy from `songs/` at the repo root — 13 walk-up
    clips (`Name - Artist - Title - walkup.mp3`; a `[placeholder]` token
-   marks songs the kid hasn't picked yet) and 4 cheer clips
-   (`_cheer - <Title>.mp3`). Parse player and song title from the
-   filenames into the manifest. More cheers can be pulled later from
-   `old/output/yt/cheer/_full/`.
+   marks songs the kid hasn't picked yet) into
+   `leagues/mdba/9u-red-sox/walkup/`, and the 4 cheer clips
+   (`_cheer - <Title>.mp3`) into `shared/cheers/`. Parse player and song
+   title from the filenames into the manifest. More cheers can be pulled
+   later from `old/output/yt/cheer/_full/`.
+
+## Team selection
+
+The app opens on the last-used team (localStorage). If none — or via a
+"switch team" control — a simple picker lists leagues/teams from the
+manifest. With one team it goes straight to it. The selected team is
+also reflected in the URL hash (`#/mdba/9u-red-sox`) so a bookmarked
+link opens the right team directly.
 
 ## App UI (two screens)
 
@@ -120,11 +140,12 @@ Built for sunlight and thumbs — big touch targets.
 
 ## Hosting / deploy
 
-- GitHub repo (SSH remote), Cloudflare Pages connected to it; `git push`
-  → build → live. Custom domain later if desired (baseball.dj is cute
-  but optional; the free `*.pages.dev` URL works fine).
-- Audio (~13 walkups + ~14 cheers + 13 intros ≈ 15–20 MB) is well within
-  free-tier limits.
+- Repo: `git@github.com:JayWang64/baseball.dj.git` (SSH). GitHub Actions
+  workflow builds the Vite site and deploys to **GitHub Pages** on every
+  push to main; app served at `jaywang64.github.io/baseball.dj/`
+  (Vite `base` set accordingly). Custom domain later if desired.
+- Audio (~13 walkups + ~14 cheers + 13 intros ≈ 15–20 MB per team) is
+  well within GitHub's limits; scales fine to a handful of teams.
 
 ## Phases
 
