@@ -37,6 +37,28 @@
     }
   }
 
+  // long-press ▶ (500ms) skips the announcer intro and goes straight to the song
+  let pressTimer = null
+  let longFired = false
+  function pressStart() {
+    longFired = false
+    if (!batter?.intro || !batter?.walkup) return
+    pressTimer = setTimeout(() => {
+      longFired = true
+      engine.playSequence([batter.walkup.url], { onDone: () => lineup.advance() })
+    }, 500)
+  }
+  function pressEnd() {
+    clearTimeout(pressTimer)
+  }
+  function onPlayClick() {
+    if (longFired) {
+      longFired = false
+      return
+    }
+    onPlayPause()
+  }
+
   // moving to another batter always cuts the current kid's song
   function stopBatterSong() {
     if (batterActive) engine.fadeOut(250)
@@ -93,7 +115,12 @@
     <button
       class="t-btn t-play"
       disabled={!playing && !batterUrls.length}
-      onclick={onPlayPause}
+      onclick={onPlayClick}
+      onpointerdown={pressStart}
+      onpointerup={pressEnd}
+      onpointerleave={pressEnd}
+      onpointercancel={pressEnd}
+      oncontextmenu={(e) => e.preventDefault()}
       aria-label={playing && !$paused ? 'Pause' : 'Play'}
     >
       {#if playing && !$paused}

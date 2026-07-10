@@ -295,6 +295,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   margin: 14px 0;
 }
 .t-btn {
+  -webkit-touch-callout: none; touch-action: manipulation;
   width: 68px; height: 68px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   border: 2px solid var(--line-strong);
