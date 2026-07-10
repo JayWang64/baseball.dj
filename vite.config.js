@@ -11,6 +11,19 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,mp3,json,woff2,svg,png}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        // safety net: if the big precache hasn't finished, any song that gets
+        // played (or refetched) online is cached individually for offline use
+        runtimeCaching: [
+          {
+            urlPattern: /\.mp3$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'audio-runtime',
+              expiration: { maxEntries: 300 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'baseball.dj',
