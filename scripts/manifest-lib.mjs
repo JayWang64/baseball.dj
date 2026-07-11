@@ -15,27 +15,55 @@ function cheerEntry(dir, file) {
   return { title: file.replace(/\.mp3$/i, ''), url: `${dir}/${file}` }
 }
 
-export function buildTeam({ roster, slug, baseDir, walkupFiles, introFiles, sharedCheers, teamCheers }) {
+export function buildTeam({
+  roster,
+  slug,
+  baseDir,
+  walkupFiles,
+  introFiles,
+  sharedCheers,
+  teamCheers,
+  sharedSfx = [],
+  teamSfx = [],
+  sharedCalls = [],
+  teamCalls = [],
+  sharedParty = [],
+  celebrateFiles = [],
+}) {
   const walkups = walkupFiles.map((f) => ({ file: f, ...parseWalkupFilename(f) }))
   const intros = new Set(introFiles.map((f) => f.toLowerCase()))
+  const celebrates = new Set(celebrateFiles.map((f) => f.toLowerCase()))
 
   const players = roster.players.map((p) => {
     const w = walkups.find((x) => x.player.toLowerCase() === p.name.toLowerCase())
-    const introFile = `${p.name.toLowerCase()}.mp3`
+    const kidFile = `${p.name.toLowerCase()}.mp3`
     return {
       name: p.name,
       number: p.number ?? null,
       walkup: w
         ? { url: `${baseDir}/walkup/${w.file}`, title: w.title, placeholder: w.placeholder }
         : null,
-      intro: intros.has(introFile) ? `${baseDir}/intros/${introFile}` : null,
+      intro: intros.has(kidFile) ? `${baseDir}/intros/${kidFile}` : null,
+      celebrate: celebrates.has(kidFile)
+        ? `${baseDir}/celebrate/${kidFile}`
+        : celebrates.has('default.mp3')
+          ? `${baseDir}/celebrate/default.mp3`
+          : null,
     }
   })
 
-  const cheers = [
-    ...sharedCheers.map((f) => cheerEntry('shared/cheers', f)),
-    ...teamCheers.map((f) => cheerEntry(`${baseDir}/cheers`, f)),
+  const group = (sharedDir, sharedFiles, teamFiles) => [
+    ...sharedFiles.map((f) => cheerEntry(sharedDir, f)),
+    ...teamFiles.map((f) => cheerEntry(`${baseDir}/${sharedDir.split('/').pop()}`, f)),
   ]
 
-  return { slug, name: roster.name, players, cheers }
+  return {
+    slug,
+    name: roster.name,
+    players,
+    cheers: group('shared/cheers', sharedCheers, teamCheers),
+    sfx: group('shared/sfx', sharedSfx, teamSfx),
+    calls: group('shared/calls', sharedCalls, teamCalls),
+    party: sharedParty.map((f) => cheerEntry('shared/party', f)),
+  }
 }

@@ -11,6 +11,7 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
   const buffers = new Map()
   let current = null // { gain, source }
   let gen = 0
+  let overlays = new Set() // one-shot layered sources (sfx, announcer calls)
 
   const nowPlaying = writable(null)
   const armed = writable(false)
@@ -95,8 +96,54 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
     await playIndex(0)
   }
 
+  // layered one-shot on its own gain node: SFX play over the music untouched
+  // (duck: 1), announcer calls duck the music to `duck` and restore after
+  const overlayPlaying = writable(null)
+  async function playOverlay(url, { duck = 1 } = {}) {
+    await arm()
+    const buffer = await getBuffer(url)
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(1, ctx.currentTime)
+    gain.connect(ctx.destination)
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    source.connect(gain)
+    const ducked = current
+    if (ducked && duck < 1) {
+      const t = ctx.currentTime
+      ducked.gain.gain.cancelScheduledValues(t)
+      ducked.gain.gain.setValueAtTime(ducked.gain.gain.value ?? 1, t)
+      ducked.gain.gain.linearRampToValueAtTime(duck, t + 0.15)
+    }
+    const entry = { source, gain }
+    overlays.add(entry)
+    overlayPlaying.set(url)
+    source.onended = () => {
+      overlays.delete(entry)
+      if (overlays.size === 0) overlayPlaying.set(null)
+      // restore the music only if the same playback is still active
+      if (duck < 1 && ducked && ducked === current) {
+        const t = ctx.currentTime
+        ducked.gain.gain.cancelScheduledValues(t)
+        ducked.gain.gain.setValueAtTime(duck, t)
+        ducked.gain.gain.linearRampToValueAtTime(1, t + 0.3)
+      }
+    }
+    source.start()
+  }
+
+  function stopOverlays() {
+    for (const { source } of overlays) {
+      source.onended = null
+      try { source.stop() } catch { /* already stopped */ }
+    }
+    overlays.clear()
+    overlayPlaying.set(null)
+  }
+
   function stop() {
     gen++
+    stopOverlays()
     if (current?.source) {
       current.source.onended = null
       try { current.source.stop() } catch { /* already stopped */ }
@@ -126,7 +173,7 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
     paused.set(false)
   }
 
-  return { arm, playSequence, stop, fadeOut, pause, resume, nowPlaying, armed, paused }
+  return { arm, playSequence, playOverlay, stop, fadeOut, pause, resume, nowPlaying, overlayPlaying, armed, paused }
 }
 
 export const engine = createEngine()

@@ -117,6 +117,26 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .net-badge.ready { color: var(--grass); border-color: var(--grass); }
 
+.share-btn {
+  flex: none; width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--line-strong); background: rgba(0,0,0,.18);
+}
+.share-btn svg { width: 18px; height: 18px; fill: var(--chalk-dim); }
+
+.share-sheet {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 90; width: min(88vw, 330px);
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+  padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--green-800), var(--green-950));
+  border: 2px solid var(--line-strong); border-radius: 18px;
+  box-shadow: var(--shadow); text-align: center;
+}
+.share-qr { border-radius: 12px; }
+.share-note { font-size: 13px; color: var(--chalk-dim); }
+.share-sheet .btn { width: 100%; min-height: 52px; }
+
 /* ============================== tab bar ============================== */
 .tabbar {
   position: fixed; left: 50%; transform: translateX(-50%);
@@ -313,7 +333,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .t-btn:disabled { opacity: .35; pointer-events: none; }
 
 .batter-nav { display: flex; gap: 8px; margin-top: 12px; }
-.batter-nav .btn { flex: 1; padding: 12px; }
+.batter-nav .btn { flex: 1; padding: 14px; min-height: 56px; }
 .ondeck { text-align: center; margin-top: 10px; font-size: 13px; color: var(--chalk-dim); }
 .ondeck b { color: var(--chalk); }
 
@@ -367,7 +387,23 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 
 .cheer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.sfx-grid { grid-template-columns: repeat(3, 1fr); }
+.sfx-btn {
+  min-height: 56px; padding: 8px 6px; font-size: 13px;
+  border-color: var(--clay-line, rgba(212,119,59,.55));
+  color: var(--clay);
+}
+.celebrate-btn {
+  flex: none; width: 58px; height: 58px; border-radius: 50%;
+  font-size: 26px;
+  border: 2px solid var(--grass-line, rgba(111,188,131,.5));
+  background: var(--grass-soft);
+}
+.celebrate-btn:active { transform: scale(.9); }
+.party-bar { display: flex; margin: 0 0 14px; }
+.party-bar .btn { flex: 1; padding: 13px; min-height: 56px; }
 .cheer-btn {
+  min-height: 56px;
   padding: 16px 10px; border-radius: 12px;
   border: 1.5px solid var(--line-strong);
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.15));

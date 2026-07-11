@@ -135,6 +135,37 @@ describe('audio engine', () => {
     expect(get(engine.paused)).toBe(false)
   })
 
+  it('playOverlay layers over the current song without stopping it', async () => {
+    await engine.playSequence(['song.mp3'])
+    const songSource = ctx.sources[0]
+    await engine.playOverlay('horn.mp3') // duck defaults to 1: no duck
+    expect(songSource.stopped).toBe(false)
+    expect(ctx.sources).toHaveLength(2)
+    expect(ctx.sources[1].started).toBe(true)
+    expect(get(engine.overlayPlaying)).toBe('horn.mp3')
+    expect(ctx.gains[0].gain.events.some(([k, v]) => k === 'ramp' && v < 1)).toBe(false)
+    ctx.sources[1].onended()
+    expect(get(engine.overlayPlaying)).toBeNull()
+    expect(get(engine.nowPlaying)).toEqual({ urls: ['song.mp3'], index: 0 })
+  })
+
+  it('playOverlay with duck lowers the song gain and restores it after', async () => {
+    await engine.playSequence(['song.mp3'])
+    const songGain = ctx.gains[0]
+    await engine.playOverlay('call.mp3', { duck: 0.3 })
+    expect(songGain.gain.events.some(([k, v]) => k === 'ramp' && v === 0.3)).toBe(true)
+    ctx.sources[1].onended()
+    const rampsTo1 = songGain.gain.events.filter(([k, v]) => k === 'ramp' && v === 1)
+    expect(rampsTo1.length).toBeGreaterThan(0)
+  })
+
+  it('stop() also kills overlays', async () => {
+    await engine.playOverlay('horn.mp3')
+    engine.stop()
+    expect(ctx.sources[0].stopped).toBe(true)
+    expect(get(engine.overlayPlaying)).toBeNull()
+  })
+
   it('fadeOut ramps gain to zero and clears nowPlaying', async () => {
     await engine.playSequence(['a.mp3'])
     engine.fadeOut(1500)

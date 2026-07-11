@@ -15,6 +15,9 @@ const dirs = (dir) =>
 const json = (file) => JSON.parse(readFileSync(file, 'utf8'))
 
 const sharedCheers = mp3s(join(pub, 'shared', 'cheers'))
+const sharedSfx = mp3s(join(pub, 'shared', 'sfx'))
+const sharedCalls = mp3s(join(pub, 'shared', 'calls'))
+const sharedParty = mp3s(join(pub, 'shared', 'party'))
 const leagues = []
 
 for (const leagueSlug of dirs(join(pub, 'leagues'))) {
@@ -39,6 +42,12 @@ for (const leagueSlug of dirs(join(pub, 'leagues'))) {
       introFiles: mp3s(join(teamDir, 'intros')),
       sharedCheers,
       teamCheers: mp3s(join(teamDir, 'cheers')),
+      sharedSfx,
+      teamSfx: mp3s(join(teamDir, 'sfx')),
+      sharedCalls,
+      teamCalls: mp3s(join(teamDir, 'calls')),
+      sharedParty,
+      celebrateFiles: mp3s(join(teamDir, 'celebrate')),
     })
     for (const p of team.players) {
       if (!p.walkup) console.warn(`warn: ${team.name}: ${p.name} has no walkup clip`)
