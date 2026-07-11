@@ -290,8 +290,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .now-info { flex: 1; min-width: 0; text-align: left; }
 .now-info .ondeck { text-align: left; margin-top: 6px; }
 .batter-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--chalk-faint); }
+.batter-label-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
 .batter-headline {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center;
   gap: 12px; margin: 4px 0;
 }
 /* batting-order slot — same amber circle as the lineup screen */
@@ -304,7 +307,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .batter-headline .batter-name { flex: 1; }
 .batter-num {
   flex: none;
-  font-family: var(--display); font-size: 24px; color: var(--amber);
+  font-family: var(--display); font-size: 20px; color: var(--amber);
   text-shadow: 0 0 14px var(--amber-glow);
 }
 .batter-name {
@@ -383,7 +386,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .split .batter-nav .btn { padding: 10px 6px; min-height: 48px; font-size: 14px; }
 .split .party-bar .btn { min-height: 48px; padding: 9px 6px; font-size: 13px; }
 .split .cheer-grid { grid-template-columns: 1fr; }
-.split .batter-headline { flex-wrap: wrap; gap: 8px; }
+.split .batter-headline { gap: 8px; }
 .split .batter-name { font-size: clamp(18px, 5.5vw, 30px); }
 .split .batter-num { font-size: 16px; }
 .split .order-badge { width: 28px; height: 28px; font-size: 13px; }
