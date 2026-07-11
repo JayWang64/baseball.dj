@@ -250,7 +250,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   z-index: 5; position: relative;
 }
 .drag-handle {
-  flex: none; padding: 6px 10px; margin: -6px -4px -6px -8px;
+  flex: none; padding: 10px 12px; margin: -10px -8px -10px 0;
   font-size: 22px; line-height: 1; color: var(--chalk-faint);
   cursor: grab; touch-action: none;
 }

@@ -58,7 +58,6 @@
         <span class="lineup-name">
           {p.name}
           {#if !p.walkup}<span class="warn-chip">no song</span>{/if}
-          {#if p.walkup?.placeholder}<span class="warn-chip">song pending</span>{/if}
           {#if p.walkup}<small>{p.walkup.title}</small>{/if}
         </span>
         <span class="lineup-num" class:dim={p.number == null}>#{p.number ?? '?'}</span>
@@ -91,15 +90,14 @@
           onchange={() => lineup.toggle(p.name)}
           title={absent ? 'Absent — check to put back in' : 'Attending — uncheck if absent'}
         />
-        <span class="drag-handle" onpointerdown={(e) => dragStart(e, p.name)}>≡</span>
         <span class="lineup-order">{absent ? '–' : rank}</span>
         <span class="lineup-name">
           {p.name}
           {#if !p.walkup}<span class="warn-chip">no song</span>{/if}
-          {#if p.walkup?.placeholder}<span class="warn-chip">song pending</span>{/if}
           {#if p.walkup}<small>{p.walkup.title}</small>{/if}
         </span>
         <span class="lineup-num" class:dim={p.number == null}>#{p.number ?? '?'}</span>
+        <span class="drag-handle" onpointerdown={(e) => dragStart(e, p.name)}>≡</span>
       </div>
     {/each}
   </div>
