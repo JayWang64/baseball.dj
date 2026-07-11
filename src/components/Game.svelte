@@ -145,7 +145,7 @@
         </div>
         <div class="batter-meta">
           {#if batter.walkup}
-            ♪ {batter.walkup.title}{#if batter.walkup.placeholder} <span class="warn-chip">song pending</span>{/if}
+            ♪ {batter.walkup.title}
           {:else}
             <span class="warn-chip">no song</span>
           {/if}
