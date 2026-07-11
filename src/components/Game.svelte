@@ -149,11 +149,13 @@
       <div class="panel now-panel" class:playing={batterActive && !$paused}>
         <div class="now-row">
           <div class="now-info">
-            <div class="batter-label">NOW BATTING</div>
+            <div class="batter-label-row">
+              <span class="batter-label">NOW BATTING</span>
+              <span class="batter-num">№ {batter.number ?? '?'}</span>
+            </div>
             <div class="batter-headline">
               <span class="order-badge">{$lineup.batterIndex + 1}</span>
               <span class="batter-name">{batter.name}</span>
-              <span class="batter-num">№ {batter.number ?? '?'}</span>
             </div>
             <div class="batter-meta">
               {#if batter.walkup}
