@@ -291,9 +291,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .now-info .ondeck { text-align: left; margin-top: 6px; }
 .batter-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--chalk-faint); }
 .batter-headline {
-  display: flex; align-items: baseline; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   gap: 12px; margin: 4px 0;
 }
+/* batting-order slot — same amber circle as the lineup screen */
+.order-badge {
+  flex: none; width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 15px;
+  color: #1c1302; background: var(--amber);
+}
+.batter-headline .batter-name { flex: 1; }
 .batter-num {
   flex: none;
   font-family: var(--display); font-size: 24px; color: var(--amber);
@@ -370,15 +378,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .order-side .lineup-name { font-size: 14px; }
 
 /* compress the controls when the order is docked */
-.split .transport { justify-content: flex-start; }
 .split .t-btn { width: 58px; height: 58px; }
 .split .t-btn svg { width: 28px; height: 28px; }
 .split .batter-nav .btn { padding: 10px 6px; min-height: 48px; font-size: 14px; }
 .split .party-bar .btn { min-height: 48px; padding: 9px 6px; font-size: 13px; }
 .split .cheer-grid { grid-template-columns: 1fr; }
-.split .batter-headline { flex-direction: column; align-items: flex-start; gap: 0; }
+.split .batter-headline { flex-wrap: wrap; gap: 8px; }
 .split .batter-name { font-size: clamp(18px, 5.5vw, 30px); }
 .split .batter-num { font-size: 16px; }
+.split .order-badge { width: 28px; height: 28px; font-size: 13px; }
 
 /* backdrop still used by the share sheet */
 .drawer-backdrop {
