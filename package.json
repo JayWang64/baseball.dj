@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@fontsource/barlow-semi-condensed": "^5.2.7",
-    "@fontsource/graduate": "^5.2.7"
+    "@fontsource/graduate": "^5.2.7",
+    "qrcode": "^1.5.4"
   }
 }

@@ -28,7 +28,13 @@ public/
                          filename if the kid hasn't picked a song yet)
     intros/              generated announcer intros, "<name>.mp3"
     cheers/              team-specific cheers (optional)
-  shared/cheers/         cheers every team gets ("Title.mp3")
+    celebrate/           optional "<name>.mp3" scored-a-run clips ("default.mp3" = fallback);
+                         shows a 🎉 button on the batter card
+  shared/cheers/         cheers every team gets ("Title.mp3") — interrupt the music
+  shared/sfx/            one-shot effects (air horn…) — play OVER the music
+  shared/calls/          announcer event calls ("Run Scored.mp3"…) — duck the music to 30%
+  shared/party/          full-length tracks for between-innings PARTY mode
+                         (streamed + cached on play; not part of the FIELD READY precache)
 ```
 
 - **New song:** drop the MP3 in `walkup/`, push. The build regenerates

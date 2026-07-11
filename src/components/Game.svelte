@@ -2,7 +2,7 @@
   import { fly, fade } from 'svelte/transition'
   import { lineup } from '../lib/lineup.js'
   import { engine } from '../lib/audio.js'
-  import CheerGrid from './CheerGrid.svelte'
+  import SoundGrid from './SoundGrid.svelte'
 
   let { team } = $props()
   const nowPlaying = engine.nowPlaying
@@ -78,6 +78,56 @@
     }
     orderOpen = false
   }
+
+  function celebrate() {
+    if (batter?.celebrate) engine.playSequence([batter.celebrate])
+  }
+
+  // ---- party mode: shuffled full-length tracks between innings ----
+  let partyOn = $state(false)
+  let partyWasOn = $state(false)
+  let queue = []
+
+  const isPartyUrl = (url) => team.party.some((t) => t.url === url)
+
+  function playNextParty() {
+    if (!queue.length) queue = [...team.party].sort(() => Math.random() - 0.5)
+    const track = queue.shift()
+    engine.playSequence([track.url], {
+      onDone: () => {
+        if (partyOn) playNextParty()
+      },
+    })
+  }
+
+  function startParty(resume = false) {
+    partyOn = true
+    partyWasOn = false
+    if (!resume) queue = []
+    playNextParty()
+  }
+
+  function stopParty() {
+    partyOn = false
+    partyWasOn = false
+    engine.fadeOut(800)
+  }
+
+  // any non-party sound (walk-up, cheer) taking over pauses the party
+  $effect(() => {
+    if (partyOn && $nowPlaying && !isPartyUrl($nowPlaying.urls[0])) {
+      partyOn = false
+      partyWasOn = true
+    }
+  })
+
+  function onStop() {
+    if (partyOn) {
+      partyOn = false
+      partyWasOn = true
+    }
+    engine.stop()
+  }
 </script>
 
 <h1 class="screen-title">GAME DAY</h1>
@@ -104,6 +154,9 @@
           <div class="ondeck">on deck: <b>{onDeck}</b></div>
         {/if}
       </div>
+      {#if batter.celebrate}
+        <button class="celebrate-btn" onclick={celebrate} title="He scored! Play celebration">🎉</button>
+      {/if}
     </div>
     <div class="batter-nav">
       <button class="btn" onclick={goBack}>‹ BACK</button>
@@ -132,16 +185,30 @@
     <button
       class="t-btn t-stop"
       disabled={!playing}
-      onclick={() => engine.stop()}
+      onclick={onStop}
       aria-label="Stop"
     >
       <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>
     </button>
   </div>
 
+  {#if team.party.length}
+    <div class="party-bar">
+      {#if partyOn}
+        <button class="btn amber" onclick={stopParty}>🎉 PARTY ON — TAP TO END</button>
+      {:else if partyWasOn}
+        <button class="btn" onclick={() => startParty(true)}>▶ RESUME PARTY</button>
+      {:else}
+        <button class="btn" onclick={() => startParty()}>🎉 PARTY MODE</button>
+      {/if}
+    </div>
+  {/if}
+
 {/if}
 
-<CheerGrid cheers={team.cheers} />
+<SoundGrid title="CHEERS" items={team.cheers} mode="music" />
+<SoundGrid title="SOUND FX · PLAY OVER THE MUSIC" items={team.sfx} mode="layer" small />
+<SoundGrid title="ANNOUNCER CALLS · DUCK THE MUSIC" items={team.calls} mode="duck" small />
 
 {#if batter}
   <button class="order-fab" onclick={() => (orderOpen = true)} aria-label="Batting order">

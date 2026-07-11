@@ -10,6 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,mp3,json,woff2,svg,png}'],
+        // party tracks are full-length songs (~35 MB) — nice-to-have, streamed
+        // and runtime-cached rather than blocking FIELD READY
+        globIgnores: ['**/shared/party/**'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         // safety net: if the big precache hasn't finished, any song that gets
         // played (or refetched) online is cached individually for offline use

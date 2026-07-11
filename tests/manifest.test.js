@@ -90,4 +90,36 @@ describe('buildTeam', () => {
       { title: 'Charge (Dodger Organ)', url: 'shared/cheers/Charge (Dodger Organ).mp3' },
     ])
   })
+
+  it('builds sfx, calls and party groups', () => {
+    const team = buildTeam({
+      ...args,
+      sharedSfx: ['Air Horn.mp3'],
+      teamSfx: ['Rally.mp3'],
+      sharedCalls: ['Run Scored.mp3'],
+      sharedParty: ['Cotton Eye Joe.mp3'],
+    })
+    expect(team.sfx).toEqual([
+      { title: 'Air Horn', url: 'shared/sfx/Air Horn.mp3' },
+      { title: 'Rally', url: 'leagues/mdba/9u-red-sox/sfx/Rally.mp3' },
+    ])
+    expect(team.calls).toEqual([
+      { title: 'Run Scored', url: 'shared/calls/Run Scored.mp3' },
+    ])
+    expect(team.party).toEqual([
+      { title: 'Cotton Eye Joe', url: 'shared/party/Cotton Eye Joe.mp3' },
+    ])
+  })
+
+  it('matches celebrate clips per kid with default fallback', () => {
+    const team = buildTeam({ ...args, celebrateFiles: ['ajith.mp3', 'default.mp3'] })
+    expect(team.players.find((p) => p.name === 'Ajith').celebrate).toBe(
+      'leagues/mdba/9u-red-sox/celebrate/ajith.mp3'
+    )
+    expect(team.players.find((p) => p.name === 'Blake').celebrate).toBe(
+      'leagues/mdba/9u-red-sox/celebrate/default.mp3'
+    )
+    const none = buildTeam(args)
+    expect(none.players.find((p) => p.name === 'Ajith').celebrate).toBeNull()
+  })
 })
