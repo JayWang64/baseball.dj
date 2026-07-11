@@ -207,7 +207,8 @@
 {/if}
 
 <SoundGrid title="CHEERS" items={team.cheers} mode="music" />
-<SoundGrid title="SOUND FX · PLAY OVER THE MUSIC" items={team.sfx} mode="layer" small />
+<!-- SFX board hidden — league doesn't allow air horns etc. Re-enable with:
+<SoundGrid title="SOUND FX · PLAY OVER THE MUSIC" items={team.sfx} mode="layer" small /> -->
 <SoundGrid title="ANNOUNCER CALLS · DUCK THE MUSIC" items={team.calls} mode="duck" small />
 
 {#if batter}
