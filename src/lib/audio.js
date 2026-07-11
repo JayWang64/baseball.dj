@@ -16,9 +16,28 @@ export function createEngine({ contextFactory, fetchFn } = {}) {
   const armed = writable(false)
   const paused = writable(false)
 
+  // iOS mutes Web Audio when the ring/silent switch is on silent, but NOT
+  // HTMLMediaElement playback. Keeping a silent looping <audio> element
+  // playing switches the audio session to "media playback", which un-mutes
+  // Web Audio regardless of the switch (the unmute.js trick).
+  let keepAlive = null
+  function ensurePlaybackSession() {
+    if (keepAlive || typeof document === 'undefined') return
+    keepAlive = document.createElement('audio')
+    keepAlive.loop = true
+    // ~0.05s of silence, 8kHz mono wav
+    keepAlive.src =
+      'data:audio/wav;base64,UklGRnoAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YVYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+    keepAlive.setAttribute('playsinline', '')
+    keepAlive.play().catch(() => {
+      keepAlive = null // retry on the next user gesture
+    })
+  }
+
   async function arm() {
     if (!ctx) ctx = makeCtx()
     if (ctx.state === 'suspended') await ctx.resume()
+    ensurePlaybackSession()
     armed.set(true)
   }
 
