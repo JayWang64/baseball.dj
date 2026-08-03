@@ -2,7 +2,7 @@
   "name": "9U Red Sox",
   "players": [
     { "name": "Ajith", "number": 8 },
-    { "name": "Blake", "number": null },
+    { "name": "Blake", "number": 13 },
     { "name": "Hugo", "number": 1 },
     { "name": "Joshua", "number": 11 },
     { "name": "Lincoln", "number": 21 },
