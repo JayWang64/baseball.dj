@@ -3,11 +3,13 @@
   import { lineup } from '../lib/lineup.js'
   import { engine } from '../lib/audio.js'
   import SoundGrid from './SoundGrid.svelte'
+  import OrganModal from './OrganModal.svelte'
 
   let { team } = $props()
   const nowPlaying = engine.nowPlaying
   const paused = engine.paused
 
+  let organOpen = $state(false)
   let orderOpen = $state(localStorage.getItem('dj.orderOpen') === '1')
   function toggleOrder() {
     orderOpen = !orderOpen
@@ -220,10 +222,21 @@
     {/if}
 
     <SoundGrid title="CHEERS" items={team.cheers} mode="music" />
+
+    {#if team.organ?.length}
+      <button class="organ-btn" onclick={() => (organOpen = true)}>
+        <span class="waffle">☰</span> ORGAN
+      </button>
+    {/if}
+
     <!-- SFX board hidden — league doesn't allow air horns etc. Re-enable with:
     <SoundGrid title="SOUND FX · PLAY OVER THE MUSIC" items={team.sfx} mode="layer" small /> -->
     <SoundGrid title="ANNOUNCER CALLS · DUCK THE MUSIC" items={team.calls} mode="duck" small />
   </div>
+
+  {#if organOpen}
+    <OrganModal items={team.organ} onclose={() => (organOpen = false)} />
+  {/if}
 
   {#if orderOpen && batter}
     <aside class="order-side" transition:fly={{ x: 120, duration: 160 }}>
