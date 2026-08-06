@@ -18,6 +18,9 @@ const sharedCheers = mp3s(join(pub, 'shared', 'cheers'))
 const sharedSfx = mp3s(join(pub, 'shared', 'sfx'))
 const sharedCalls = mp3s(join(pub, 'shared', 'calls'))
 const sharedParty = mp3s(join(pub, 'shared', 'party'))
+const sharedOrgan = mp3s(join(pub, 'shared', 'organ')).sort((a, b) => a.localeCompare(b))
+const organDurFile = join(pub, 'shared', 'organ', 'durations.json')
+const organDurations = existsSync(organDurFile) ? json(organDurFile) : {}
 const leagues = []
 
 for (const leagueSlug of dirs(join(pub, 'leagues'))) {
@@ -47,6 +50,8 @@ for (const leagueSlug of dirs(join(pub, 'leagues'))) {
       sharedCalls,
       teamCalls: mp3s(join(teamDir, 'calls')),
       sharedParty,
+      sharedOrgan,
+      organDurations,
       celebrateFiles: mp3s(join(teamDir, 'celebrate')),
     })
     for (const p of team.players) {

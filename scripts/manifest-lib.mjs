@@ -28,6 +28,8 @@ export function buildTeam({
   sharedCalls = [],
   teamCalls = [],
   sharedParty = [],
+  sharedOrgan = [],
+  organDurations = {},
   celebrateFiles = [],
 }) {
   const walkups = walkupFiles.map((f) => ({ file: f, ...parseWalkupFilename(f) }))
@@ -65,5 +67,9 @@ export function buildTeam({
     sfx: group('shared/sfx', sharedSfx, teamSfx),
     calls: group('shared/calls', sharedCalls, teamCalls),
     party: sharedParty.map((f) => cheerEntry('shared/party', f)),
+    organ: sharedOrgan.map((f) => ({
+      ...cheerEntry('shared/organ', f),
+      duration: organDurations[f] ?? null,
+    })),
   }
 }

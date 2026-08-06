@@ -431,6 +431,52 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .celebrate-btn:active { transform: scale(.9); }
 .party-bar { display: flex; margin: 0 0 14px; }
 .party-bar .btn { flex: 1; padding: 13px; min-height: 56px; }
+
+/* Organ waffle button + modal */
+.organ-btn {
+  width: 100%; min-height: 56px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  border-radius: 12px; border: 1.5px solid var(--line-strong);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.15));
+  font-weight: 800; letter-spacing: 1.5px; font-size: 15px;
+}
+.organ-btn:active { transform: scale(.98); }
+.organ-btn .waffle { font-size: 20px; color: var(--amber); }
+
+.organ-sheet {
+  position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 90; width: min(92vw, 420px);
+  max-height: 62vh; display: flex; flex-direction: column;
+  padding: 12px; border-radius: 18px;
+  background: linear-gradient(180deg, var(--green-800), var(--green-950));
+  border: 2px solid var(--line-strong); box-shadow: var(--shadow);
+}
+.organ-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 4px 10px;
+}
+.organ-head .panel-title { margin: 0; }
+.organ-close {
+  width: 34px; height: 34px; border-radius: 9px; font-size: 15px;
+  color: var(--chalk-dim); border: 1.5px solid var(--line-strong); background: rgba(0,0,0,.2);
+}
+.organ-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.organ-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 12px; min-height: 52px; border-radius: 10px; text-align: left;
+  border: 1.5px solid var(--line); background: rgba(0,0,0,.12);
+}
+.organ-row:active { transform: scale(.99); }
+.organ-row.playing {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(255,182,39,.22), rgba(0,0,0,.12));
+  box-shadow: 0 0 16px var(--amber-glow);
+}
+.organ-play { flex: none; color: var(--amber); font-size: 14px; }
+.organ-name { flex: 1; min-width: 0; font-weight: 700; font-size: 16px; }
+.organ-no { font-family: var(--display); color: var(--amber); font-weight: 400; margin-right: 4px; }
+.organ-dur { flex: none; font-family: var(--display); font-size: 13px; color: var(--chalk-dim); }
 .cheer-btn {
   min-height: 56px;
   padding: 16px 10px; border-radius: 12px;
